@@ -1,4 +1,4 @@
-//maqueue => skeleton from cs492-concur-master/lockfree/queue
+//! maqueue => skeleton from cs492-concur-master/lockfree/queue
 
 use core::mem::{self, ManuallyDrop};
 use core::ptr;
@@ -7,7 +7,7 @@ use core::sync::atomic::Ordering;
 use crossbeam_epoch::{unprotected, Atomic, Guard, Owned, Shared};
 use crossbeam_utils::CachePadded;
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct MSQueue<T> {
     head: CachePadded<Atomic<Node<T>>>,
     tail: CachePadded<Atomic<Node<T>>>,
@@ -15,7 +15,6 @@ pub struct MSQueue<T> {
 
 #[derive(Debug)]
 struct Node<T> {
-
     data: ManuallyDrop<T>,
     next: Atomic<Node<T>>,
 }
@@ -27,43 +26,53 @@ unsafe impl<T: Send> Send for MSQueue<T> {}
 impl<T> MSQueue<T> {
     /// Create a new, empty queue.
     pub fn new() -> MSQueue<T> {
-        let q = MSQueue{
+        let q = MSQueue {
             head: CachePadded::new(Atomic::null()),
-            tail: CachePadded::new(Atomic::null())
+            tail: CachePadded::new(Atomic::null()),
         };
-        let sentinel = Owned::new(Node{
-            data: unsafe{mem::uninitialized()},
+        let sentinel = Owned::new(Node {
+            data: unsafe { mem::uninitialized() },
             next: Atomic::null(),
         });
-        unsafe{let guard = &unprotected();//epoch::pin();
-        let sentinel = sentinel.into_shared(&guard);
-        q.head.store(sentinel, Ordering::Relaxed);
-        q.tail.store(sentinel, Ordering::Relaxed);}
+        unsafe {
+            let guard = &unprotected(); //epoch::pin();
+            let sentinel = sentinel.into_shared(&guard);
+            q.head.store(sentinel, Ordering::Relaxed);
+            q.tail.store(sentinel, Ordering::Relaxed);
+        }
         q
     }
 
     /// Adds `t` to the back of the queue, possibly waking up threads blocked on `pop`.
     pub fn push(&self, t: T, guard: &Guard) {
-        let node = Owned::new(Node{
+        let node = Owned::new(Node {
             data: ManuallyDrop::new(t),
             next: Atomic::null(),
         });
         let node = node.into_shared(guard);
-        loop{
+        loop {
             //load acquire tail
             let tail = self.tail.load(Ordering::Acquire, guard);
 
             //check if this is real tail
-            let tail_ref = unsafe{tail.deref()};
+            let tail_ref = unsafe { tail.deref() };
             let next = tail_ref.next.load(Ordering::Acquire, guard);
-            if !next.is_null(){
+            if !next.is_null() {
                 //move tail pointer forward
-                let _ = self.tail.compare_and_set(tail, next, Ordering::Release, guard);
+                let _ = self
+                    .tail
+                    .compare_and_set(tail, next, Ordering::Release, guard);
                 continue;
             }
 
-            if tail_ref.next.compare_and_set(Shared::null(), node, Ordering::Release, guard).is_ok(){
-                let _ = self.tail.compare_and_set(tail, node, Ordering::Release, guard);
+            if tail_ref
+                .next
+                .compare_and_set(Shared::null(), node, Ordering::Release, guard)
+                .is_ok()
+            {
+                let _ = self
+                    .tail
+                    .compare_and_set(tail, node, Ordering::Release, guard);
                 break;
             }
 
@@ -75,27 +84,34 @@ impl<T> MSQueue<T> {
     ///
     /// Returns `None` if the queue is observed to be empty.
     pub fn try_pop(&self, guard: &Guard) -> Option<T> {
-        loop{
+        loop {
             let head = self.head.load(Ordering::Acquire, guard);
-            let next = unsafe{head.deref()}.next.load(Ordering::Acquire, guard);
-            let nextref = unsafe{next.as_ref()};
-            if !nextref.is_some(){
+            let next = unsafe { head.deref() }.next.load(Ordering::Acquire, guard);
+            let nextref = unsafe { next.as_ref() };
+            if nextref.is_none() {
                 return None;
             }
 
             //Move tail
             let tail = self.tail.load(Ordering::Acquire, guard);
             if tail == head {
-                let _ = self.tail.compare_and_set(tail, next, Ordering::Release, guard);
+                let _ = self
+                    .tail
+                    .compare_and_set(tail, next, Ordering::Release, guard);
             }
 
-            if self.head.compare_and_set(head, next, Ordering::Release, guard).is_ok(){
-                unsafe{guard.defer_destroy(head);
-                return Some(ManuallyDrop::into_inner(ptr::read(&nextref.unwrap().data)));}
+            if self
+                .head
+                .compare_and_set(head, next, Ordering::Release, guard)
+                .is_ok()
+            {
+                unsafe {
+                    guard.defer_destroy(head);
+                    return Some(ManuallyDrop::into_inner(ptr::read(&nextref.unwrap().data)));
+                }
             }
         }
         //unimplemented!()
-
     }
 }
 

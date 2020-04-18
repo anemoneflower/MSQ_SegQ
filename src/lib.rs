@@ -8,8 +8,8 @@ extern crate crossbeam_utils;
 
 #[macro_use]
 mod utils;
-mod queue; //segqueue
 mod msqueue;
+mod queue; //segqueue
 
-pub use queue::Queue;
 pub use msqueue::MSQueue;
+pub use queue::Queue;
