@@ -10,21 +10,21 @@ use std::cell::UnsafeCell;
 use std::cmp;
 use std::sync::atomic::{AtomicBool, AtomicUsize};
 
-const SEG_SIZE: usize = 32;
+pub(crate) const SEG_SIZE: usize = 32;
 
 #[derive(Debug, Default)]
 /// Segment Queue structure
 pub struct SegQueue<T> {
-    head: Atomic<Segment<T>>,
-    tail: Atomic<Segment<T>>,
+    pub(crate) head: Atomic<Segment<T>>,
+    pub(crate) tail: Atomic<Segment<T>>,
 }
 
 #[derive(Debug)]
-struct Segment<T> {
-    low: AtomicUsize,
-    high: AtomicUsize,
-    data: ManuallyDrop<[UnsafeCell<(T, AtomicBool)>; SEG_SIZE]>,
-    next: Atomic<Segment<T>>,
+pub struct Segment<T> {
+    pub(crate) low: AtomicUsize,
+    pub(crate) high: AtomicUsize,
+    pub(crate) data: ManuallyDrop<[UnsafeCell<(T, AtomicBool)>; SEG_SIZE]>,
+    pub(crate) next: Atomic<Segment<T>>,
 }
 
 unsafe impl<T: Send> Sync for Segment<T> {}
@@ -146,213 +146,5 @@ impl<T> Drop for SegQueue<T> {
             let sentinel = self.head.load(Ordering::Relaxed, unprotected());
             drop(sentinel.into_owned());
         }
-    }
-}
-
-#[cfg(test)]
-mod test {
-    use super::*;
-    use crossbeam_epoch::pin;
-    use crossbeam_utils::thread::scope;
-
-    struct SegQueue<T> {
-        queue: super::SegQueue<T>,
-    }
-
-    impl<T> SegQueue<T> {
-        pub fn new() -> SegQueue<T> {
-            SegQueue {
-                queue: super::SegQueue::new(),
-            }
-        }
-
-        pub fn push(&self, t: T) {
-            let guard = &pin();
-            self.queue.push(t, guard);
-        }
-
-        pub fn is_empty(&self) -> bool {
-            let guard = &pin();
-            let head = self.queue.head.load(Ordering::Acquire, guard);
-            let tail = self.queue.tail.load(Ordering::Acquire, guard);
-            if head != tail {
-                return false;
-            }
-            let h = unsafe { head.deref() };
-            if h.low.load(Ordering::Relaxed) >= cmp::min(h.high.load(Ordering::Relaxed), SEG_SIZE) {
-                return true;
-            }
-            return false;
-        }
-
-        pub fn try_pop(&self) -> Option<T> {
-            let guard = &pin();
-            self.queue.try_pop(guard)
-        }
-
-        pub fn pop(&self) -> T {
-            loop {
-                match self.try_pop() {
-                    None => continue,
-                    Some(t) => return t,
-                }
-            }
-        }
-    }
-
-    const CONC_COUNT: i64 = 1000000;
-
-    #[test]
-    fn push_try_pop_1() {
-        let q: SegQueue<i64> = SegQueue::new();
-        assert!(q.is_empty());
-        q.push(37);
-        assert!(!q.is_empty());
-        assert_eq!(q.try_pop(), Some(37));
-        assert!(q.is_empty());
-    }
-
-    #[test]
-    fn push_try_pop_2() {
-        let q: SegQueue<i64> = SegQueue::new();
-        assert!(q.is_empty());
-        q.push(37);
-        q.push(48);
-        assert_eq!(q.try_pop(), Some(37));
-        assert!(!q.is_empty());
-        assert_eq!(q.try_pop(), Some(48));
-        assert!(q.is_empty());
-    }
-
-    #[test]
-    fn push_try_pop_many_seq() {
-        let q: SegQueue<i64> = SegQueue::new();
-        assert!(q.is_empty());
-        for i in 0..200 {
-            q.push(i)
-        }
-        assert!(!q.is_empty());
-        for i in 0..200 {
-            assert_eq!(q.try_pop(), Some(i));
-        }
-        assert!(q.is_empty());
-    }
-
-    #[test]
-    fn push_pop_1() {
-        let q: SegQueue<i64> = SegQueue::new();
-        assert!(q.is_empty());
-        q.push(37);
-        assert!(!q.is_empty());
-        assert_eq!(q.pop(), 37);
-        assert!(q.is_empty());
-    }
-
-    #[test]
-    fn push_pop_2() {
-        let q: SegQueue<i64> = SegQueue::new();
-        q.push(37);
-        q.push(48);
-        assert_eq!(q.pop(), 37);
-        assert_eq!(q.pop(), 48);
-    }
-    #[test]
-    fn push_pop_empty_check() {
-        let q: SegQueue<i64> = SegQueue::new();
-        assert_eq!(q.is_empty(), true);
-        q.push(42);
-        assert_eq!(q.is_empty(), false);
-        assert_eq!(q.try_pop(), Some(42));
-        assert_eq!(q.is_empty(), true);
-    }
-    #[test]
-    fn push_pop_many_seq() {
-        let q: SegQueue<i64> = SegQueue::new();
-        assert!(q.is_empty());
-        for i in 0..200 {
-            q.push(i)
-        }
-        assert!(!q.is_empty());
-        for i in 0..200 {
-            assert_eq!(q.pop(), i);
-        }
-        assert!(q.is_empty());
-    }
-
-    #[test]
-    fn push_pop_many_spsc() {
-        let q: SegQueue<i64> = SegQueue::new();
-
-        scope(|scope| {
-            scope.spawn(|_| {
-                let mut next = 0;
-
-                while next < CONC_COUNT {
-                    if let Some(elem) = q.try_pop() {
-                        assert_eq!(elem, next);
-                        next += 1;
-                    }
-                }
-            });
-
-            for i in 0..CONC_COUNT {
-                q.push(i)
-            }
-        })
-        .unwrap();
-    }
-    #[test]
-    fn push_pop_many_mpmc() {
-        enum LR {
-            Left(i64),
-            Right(i64),
-        }
-
-        let q: SegQueue<LR> = SegQueue::new();
-
-        scope(|scope| {
-            for _t in 0..2 {
-                scope.spawn(|_| {
-                    for i in CONC_COUNT - 1..CONC_COUNT {
-                        q.push(LR::Left(i))
-                    }
-                });
-                scope.spawn(|_| {
-                    for i in CONC_COUNT - 1..CONC_COUNT {
-                        q.push(LR::Right(i))
-                    }
-                });
-                scope.spawn(|_| {
-                    let mut vl = vec![];
-                    let mut vr = vec![];
-                    for _i in 0..CONC_COUNT {
-                        match q.try_pop() {
-                            Some(LR::Left(x)) => vl.push(x),
-                            Some(LR::Right(x)) => vr.push(x),
-                            _ => {}
-                        }
-                    }
-
-                    let mut vl2 = vl.clone();
-                    let mut vr2 = vr.clone();
-                    vl2.sort();
-                    vr2.sort();
-
-                    assert_eq!(vl, vl2);
-                    assert_eq!(vr, vr2);
-                });
-            }
-        })
-        .unwrap();
-    }
-
-    #[test]
-    fn is_empty_dont_pop() {
-        let q: SegQueue<i64> = SegQueue::new();
-        q.push(20);
-        q.push(20);
-        assert!(!q.is_empty());
-        assert!(!q.is_empty());
-        assert!(q.try_pop().is_some());
     }
 }
