@@ -1,6 +1,6 @@
 //! msqueue => skeleton from cs492-concur-master/lockfree/queue
 
-use core::mem::{self, ManuallyDrop};
+use core::mem::{ManuallyDrop, MaybeUninit};
 use core::ptr;
 use core::sync::atomic::Ordering;
 
@@ -8,6 +8,7 @@ use crossbeam_epoch::{unprotected, Atomic, Guard, Owned, Shared};
 use crossbeam_utils::CachePadded;
 
 #[derive(Debug, Default)]
+/// Michael-Scott queue structure
 pub struct MSQueue<T> {
     head: CachePadded<Atomic<Node<T>>>,
     tail: CachePadded<Atomic<Node<T>>>,
@@ -19,10 +20,7 @@ struct Node<T> {
     next: Atomic<Node<T>>,
 }
 
-// Any particular `T` should never be accessed concurrently, so no need for `Sync`.
 unsafe impl<T: Send> Sync for MSQueue<T> {}
-unsafe impl<T: Send> Send for MSQueue<T> {}
-
 impl<T> MSQueue<T> {
     /// Create a new, empty queue.
     pub fn new() -> MSQueue<T> {
@@ -31,12 +29,11 @@ impl<T> MSQueue<T> {
             tail: CachePadded::new(Atomic::null()),
         };
         let sentinel = Owned::new(Node {
-            data: unsafe { mem::MaybeUninit() },
+            data: unsafe { MaybeUninit::uninit().assume_init() },
             next: Atomic::null(),
         });
         unsafe {
-            let guard = &unprotected();
-            let sentinel = sentinel.into_shared(&guard);
+            let sentinel = sentinel.into_shared(&unprotected());
             q.head.store(sentinel, Ordering::Relaxed);
             q.tail.store(sentinel, Ordering::Relaxed);
         }
@@ -85,7 +82,6 @@ impl<T> MSQueue<T> {
             let head = self.head.load(Ordering::Acquire, guard);
             let next = unsafe { head.deref() }.next.load(Ordering::Acquire, guard);
             let nextref = some_or!(unsafe { next.as_ref() }, return None);
-            nextref = nextref.unwrap();
 
             // Move tail
             let tail = self.tail.load(Ordering::Acquire, guard);
@@ -139,8 +135,7 @@ mod test {
         }
 
         pub fn push(&self, t: T) {
-            let guard = &pin();
-            self.queue.push(t, guard);
+            self.queue.push(t, &pin());
         }
 
         pub fn is_empty(&self) -> bool {
@@ -151,8 +146,8 @@ mod test {
         }
 
         pub fn try_pop(&self) -> Option<T> {
-            let guard = &pin();
-            self.queue.try_pop(guard)
+            //let guard = &pin();
+            self.queue.try_pop(&pin())
         }
 
         pub fn pop(&self) -> T {

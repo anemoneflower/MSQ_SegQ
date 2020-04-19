@@ -1,6 +1,6 @@
 //! Segment Queue => skeleton from msqueue + test from segqueue source
 
-use core::mem::{self, ManuallyDrop};
+use core::mem::{ManuallyDrop, MaybeUninit};
 use core::ptr;
 use core::sync::atomic::Ordering;
 
@@ -8,12 +8,12 @@ use crossbeam_epoch::{self, unprotected, Atomic, Guard, Owned};
 
 use std::cell::UnsafeCell;
 use std::cmp;
-use std::sync::atomic::AtomicBool;
-use std::sync::atomic::AtomicUsize;
+use std::sync::atomic::{AtomicBool, AtomicUsize};
 
 const SEG_SIZE: usize = 32;
 
 #[derive(Debug, Default)]
+/// Segment Queue structure
 pub struct SegQueue<T> {
     head: Atomic<Segment<T>>,
     tail: Atomic<Segment<T>>,
@@ -33,7 +33,7 @@ impl<T> Segment<T> {
         let s = Segment {
             low: AtomicUsize::new(0),
             high: AtomicUsize::new(0),
-            data: unsafe { ManuallyDrop::new(mem::uninitialized()) },
+            data: unsafe { MaybeUninit::uninit().assume_init() },
             next: Atomic::null(),
         };
         for cell in s.data.iter() {
@@ -54,14 +54,14 @@ impl<T> SegQueue<T> {
         };
         let sentinel = Owned::new(Segment::new());
         unsafe {
-            let guard = &unprotected();
-            let sentinel = sentinel.into_shared(&guard);
+            let sentinel = sentinel.into_shared(&unprotected());
             q.head.store(sentinel, Ordering::Relaxed);
             q.tail.store(sentinel, Ordering::Relaxed);
         }
         q
     }
 
+    /// Push
     pub fn push(&self, t: T, guard: &Guard) {
         loop {
             //load acquire tail
@@ -89,6 +89,7 @@ impl<T> SegQueue<T> {
         }
     }
 
+    /// Pop
     pub fn try_pop(&self, guard: &Guard) -> Option<T> {
         loop {
             let head = self.head.load(Ordering::Acquire, guard);
@@ -140,10 +141,9 @@ impl<T> SegQueue<T> {
 impl<T> Drop for SegQueue<T> {
     fn drop(&mut self) {
         unsafe {
-            let guard = unprotected();
-            while self.try_pop(guard).is_some() {}
+            while self.try_pop(unprotected()).is_some() {}
             // Destroy the remaining sentinel node.
-            let sentinel = self.head.load(Ordering::Relaxed, guard);
+            let sentinel = self.head.load(Ordering::Relaxed, unprotected());
             drop(sentinel.into_owned());
         }
     }
@@ -183,7 +183,6 @@ mod test {
                 return true;
             }
             return false;
-            //h.next.load(Ordering::Acquire, guard).is_null()
         }
 
         pub fn try_pop(&self) -> Option<T> {
