@@ -1,4 +1,4 @@
-//! maqueue => skeleton from cs492-concur-master/lockfree/queue
+//! msqueue => skeleton from cs492-concur-master/lockfree/queue
 
 use core::mem::{self, ManuallyDrop};
 use core::ptr;
@@ -31,11 +31,11 @@ impl<T> MSQueue<T> {
             tail: CachePadded::new(Atomic::null()),
         };
         let sentinel = Owned::new(Node {
-            data: unsafe { mem::uninitialized() },
+            data: unsafe { mem::MaybeUninit() },
             next: Atomic::null(),
         });
         unsafe {
-            let guard = &unprotected(); //epoch::pin();
+            let guard = &unprotected();
             let sentinel = sentinel.into_shared(&guard);
             q.head.store(sentinel, Ordering::Relaxed);
             q.tail.store(sentinel, Ordering::Relaxed);
@@ -51,14 +51,14 @@ impl<T> MSQueue<T> {
         });
         let node = node.into_shared(guard);
         loop {
-            //load acquire tail
+            // load acquire tail
             let tail = self.tail.load(Ordering::Acquire, guard);
 
-            //check if this is real tail
+            // check if this is real tail
             let tail_ref = unsafe { tail.deref() };
             let next = tail_ref.next.load(Ordering::Acquire, guard);
             if !next.is_null() {
-                //move tail pointer forward
+                // move tail pointer forward
                 let _ = self
                     .tail
                     .compare_and_set(tail, next, Ordering::Release, guard);
@@ -75,24 +75,19 @@ impl<T> MSQueue<T> {
                     .compare_and_set(tail, node, Ordering::Release, guard);
                 break;
             }
-
-            //unimplemented!()
         }
     }
 
     /// Attempts to dequeue from the front.
-    ///
     /// Returns `None` if the queue is observed to be empty.
     pub fn try_pop(&self, guard: &Guard) -> Option<T> {
         loop {
             let head = self.head.load(Ordering::Acquire, guard);
             let next = unsafe { head.deref() }.next.load(Ordering::Acquire, guard);
-            let nextref = unsafe { next.as_ref() };
-            if nextref.is_none() {
-                return None;
-            }
+            let nextref = some_or!(unsafe { next.as_ref() }, return None);
+            nextref = nextref.unwrap();
 
-            //Move tail
+            // Move tail
             let tail = self.tail.load(Ordering::Acquire, guard);
             if tail == head {
                 let _ = self
@@ -107,23 +102,20 @@ impl<T> MSQueue<T> {
             {
                 unsafe {
                     guard.defer_destroy(head);
-                    return Some(ManuallyDrop::into_inner(ptr::read(&nextref.unwrap().data)));
+                    return Some(ManuallyDrop::into_inner(ptr::read(&nextref.data)));
                 }
             }
         }
-        //unimplemented!()
     }
 }
 
 impl<T> Drop for MSQueue<T> {
     fn drop(&mut self) {
         unsafe {
-            let guard = unprotected();
-
-            while let Some(_) = self.try_pop(guard) {}
+            while let Some(_) = self.try_pop(unprotected()) {}
 
             // Destroy the remaining sentinel node.
-            let sentinel = self.head.load(Ordering::Relaxed, guard);
+            let sentinel = self.head.load(Ordering::Relaxed, unprotected());
             drop(sentinel.into_owned());
         }
     }
