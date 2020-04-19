@@ -14,7 +14,7 @@ use std::sync::atomic::AtomicUsize;
 const SEG_SIZE: usize = 32;
 
 #[derive(Debug, Default)]
-pub struct Queue<T> {
+pub struct SegQueue<T> {
     head: Atomic<Segment<T>>,
     tail: Atomic<Segment<T>>,
 }
@@ -45,10 +45,10 @@ impl<T> Segment<T> {
     }
 }
 
-impl<T> Queue<T> {
+impl<T> SegQueue<T> {
     /// Create a new, empty queue.
-    pub fn new() -> Queue<T> {
-        let q = Queue {
+    pub fn new() -> SegQueue<T> {
+        let q = SegQueue {
             head: Atomic::null(),
             tail: Atomic::null(),
         };
@@ -92,7 +92,6 @@ impl<T> Queue<T> {
     pub fn try_pop(&self, guard: &Guard) -> Option<T> {
         loop {
             let head = self.head.load(Ordering::Acquire, guard);
-
             let head_ref = unsafe { head.as_ref() }.unwrap();
 
             loop {
@@ -130,7 +129,7 @@ impl<T> Queue<T> {
                     return unsafe { Some(ptr::read(&(*cell).0)) };
                 }
             }
-            //check empty queue
+            // check empty queue
             if head_ref.next.load(Ordering::Relaxed, guard).is_null() {
                 return None;
             }
@@ -138,7 +137,7 @@ impl<T> Queue<T> {
     }
 }
 
-impl<T> Drop for Queue<T> {
+impl<T> Drop for SegQueue<T> {
     fn drop(&mut self) {
         unsafe {
             let guard = unprotected();
@@ -156,14 +155,14 @@ mod test {
     use crossbeam_epoch::pin;
     use crossbeam_utils::thread::scope;
 
-    struct Queue<T> {
-        queue: super::Queue<T>,
+    struct SegQueue<T> {
+        queue: super::SegQueue<T>,
     }
 
-    impl<T> Queue<T> {
-        pub fn new() -> Queue<T> {
-            Queue {
-                queue: super::Queue::new(),
+    impl<T> SegQueue<T> {
+        pub fn new() -> SegQueue<T> {
+            SegQueue {
+                queue: super::SegQueue::new(),
             }
         }
 
@@ -206,7 +205,7 @@ mod test {
 
     #[test]
     fn push_try_pop_1() {
-        let q: Queue<i64> = Queue::new();
+        let q: SegQueue<i64> = SegQueue::new();
         assert!(q.is_empty());
         q.push(37);
         assert!(!q.is_empty());
@@ -216,7 +215,7 @@ mod test {
 
     #[test]
     fn push_try_pop_2() {
-        let q: Queue<i64> = Queue::new();
+        let q: SegQueue<i64> = SegQueue::new();
         assert!(q.is_empty());
         q.push(37);
         q.push(48);
@@ -228,7 +227,7 @@ mod test {
 
     #[test]
     fn push_try_pop_many_seq() {
-        let q: Queue<i64> = Queue::new();
+        let q: SegQueue<i64> = SegQueue::new();
         assert!(q.is_empty());
         for i in 0..200 {
             q.push(i)
@@ -242,7 +241,7 @@ mod test {
 
     #[test]
     fn push_pop_1() {
-        let q: Queue<i64> = Queue::new();
+        let q: SegQueue<i64> = SegQueue::new();
         assert!(q.is_empty());
         q.push(37);
         assert!(!q.is_empty());
@@ -252,7 +251,7 @@ mod test {
 
     #[test]
     fn push_pop_2() {
-        let q: Queue<i64> = Queue::new();
+        let q: SegQueue<i64> = SegQueue::new();
         q.push(37);
         q.push(48);
         assert_eq!(q.pop(), 37);
@@ -260,7 +259,7 @@ mod test {
     }
     #[test]
     fn push_pop_empty_check() {
-        let q: Queue<i64> = Queue::new();
+        let q: SegQueue<i64> = SegQueue::new();
         assert_eq!(q.is_empty(), true);
         q.push(42);
         assert_eq!(q.is_empty(), false);
@@ -269,7 +268,7 @@ mod test {
     }
     #[test]
     fn push_pop_many_seq() {
-        let q: Queue<i64> = Queue::new();
+        let q: SegQueue<i64> = SegQueue::new();
         assert!(q.is_empty());
         for i in 0..200 {
             q.push(i)
@@ -283,7 +282,7 @@ mod test {
 
     #[test]
     fn push_pop_many_spsc() {
-        let q: Queue<i64> = Queue::new();
+        let q: SegQueue<i64> = SegQueue::new();
 
         scope(|scope| {
             scope.spawn(|_| {
@@ -310,7 +309,7 @@ mod test {
             Right(i64),
         }
 
-        let q: Queue<LR> = Queue::new();
+        let q: SegQueue<LR> = SegQueue::new();
 
         scope(|scope| {
             for _t in 0..2 {
@@ -350,7 +349,7 @@ mod test {
 
     #[test]
     fn is_empty_dont_pop() {
-        let q: Queue<i64> = Queue::new();
+        let q: SegQueue<i64> = SegQueue::new();
         q.push(20);
         q.push(20);
         assert!(!q.is_empty());
