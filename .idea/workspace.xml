@@ -13,10 +13,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="874c837e-7d93-4c0d-b397-491bdeb533f4" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/test_ftns.rs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/queue.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/lockfree.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/lockfree.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Cargo.toml" beforeDir="false" afterPath="$PROJECT_DIR$/Cargo.toml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/lib.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/msqueue.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/msqueue.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/segqueue.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/segqueue.rs" afterDir="false" />
@@ -68,10 +67,10 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Cargo Command.Test test_ftns">
-    <configuration name="Test test_ftns" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
+  <component name="RunManager" selected="Cargo Command.Test msqueue::test">
+    <configuration name="Test msqueue::test" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
       <option name="channel" value="DEFAULT" />
-      <option name="command" value="test --package queues --lib test_ftns" />
+      <option name="command" value="test --package queues --lib msqueue::test" />
       <option name="allFeatures" value="false" />
       <option name="nocapture" value="false" />
       <option name="emulateTerminal" value="false" />
@@ -82,9 +81,9 @@
         <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
       </method>
     </configuration>
-    <configuration name="Test test_ftns::test" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
+    <configuration name="Test msqueue::test::push_pop_many_spsc" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
       <option name="channel" value="DEFAULT" />
-      <option name="command" value="test --package queues --lib test_ftns::test" />
+      <option name="command" value="test --package queues --lib msqueue::test::push_pop_many_spsc -- --exact" />
       <option name="allFeatures" value="false" />
       <option name="nocapture" value="false" />
       <option name="emulateTerminal" value="false" />
@@ -95,9 +94,9 @@
         <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
       </method>
     </configuration>
-    <configuration name="Test test_ftns::test::test_push_try_pop_1" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
+    <configuration name="Test msqueue::test::test_push_pop_many_spsc" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
       <option name="channel" value="DEFAULT" />
-      <option name="command" value="test --package queues --lib test_ftns::test::test_push_try_pop_1 -- --exact" />
+      <option name="command" value="test --package queues --lib msqueue::test::test_push_pop_many_spsc -- --exact" />
       <option name="allFeatures" value="false" />
       <option name="nocapture" value="false" />
       <option name="emulateTerminal" value="false" />
@@ -108,9 +107,9 @@
         <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
       </method>
     </configuration>
-    <configuration name="Test test_ftns::test::test_push_try_pop_2" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
+    <configuration name="Test msqueue::test::test_push_try_pop_many_mpmc" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
       <option name="channel" value="DEFAULT" />
-      <option name="command" value="test --package queues --lib test_ftns::test::test_push_try_pop_2 -- --exact" />
+      <option name="command" value="test --package queues --lib msqueue::test::test_push_try_pop_many_mpmc -- --exact" />
       <option name="allFeatures" value="false" />
       <option name="nocapture" value="false" />
       <option name="emulateTerminal" value="false" />
@@ -121,9 +120,9 @@
         <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
       </method>
     </configuration>
-    <configuration name="Test test_ftns::test::test_push_try_pop_many_spmc" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
+    <configuration name="Test segqueue::test" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
       <option name="channel" value="DEFAULT" />
-      <option name="command" value="test --package queues --lib test_ftns::test::test_push_try_pop_many_spmc -- --exact" />
+      <option name="command" value="test --package queues --lib segqueue::test" />
       <option name="allFeatures" value="false" />
       <option name="nocapture" value="false" />
       <option name="emulateTerminal" value="false" />
@@ -136,11 +135,11 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Cargo Command.Test test_ftns" />
-        <item itemvalue="Cargo Command.Test test_ftns::test" />
-        <item itemvalue="Cargo Command.Test test_ftns::test::test_push_try_pop_many_spmc" />
-        <item itemvalue="Cargo Command.Test test_ftns::test::test_push_try_pop_1" />
-        <item itemvalue="Cargo Command.Test test_ftns::test::test_push_try_pop_2" />
+        <item itemvalue="Cargo Command.Test msqueue::test" />
+        <item itemvalue="Cargo Command.Test segqueue::test" />
+        <item itemvalue="Cargo Command.Test msqueue::test::test_push_try_pop_many_mpmc" />
+        <item itemvalue="Cargo Command.Test msqueue::test::test_push_pop_many_spsc" />
+        <item itemvalue="Cargo Command.Test msqueue::test::push_pop_many_spsc" />
       </list>
     </recent_temporary>
   </component>
@@ -163,7 +162,12 @@
       <workItem from="1587126126385" duration="1302000" />
       <workItem from="1587179253286" duration="1228000" />
       <workItem from="1587231900839" duration="803000" />
-      <workItem from="1587296819492" duration="12766000" />
+      <workItem from="1587296819492" duration="13559000" />
+      <workItem from="1587878713921" duration="8179000" />
+      <workItem from="1588175560516" duration="2293000" />
+      <workItem from="1588181713701" duration="96000" />
+      <workItem from="1588839495870" duration="887000" />
+      <workItem from="1589076483600" duration="8946000" />
     </task>
     <servers />
   </component>

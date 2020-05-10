@@ -9,8 +9,10 @@ extern crate crossbeam_utils;
 #[macro_use]
 mod utils;
 mod msqueue;
+mod queue;
 mod segqueue;
-mod test_ftns;
+//mod test_ftns;
 
 pub use msqueue::MSQueue;
+pub use queue::Queue;
 pub use segqueue::SegQueue;

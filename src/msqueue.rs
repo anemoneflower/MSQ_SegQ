@@ -4,8 +4,10 @@ use core::mem::{ManuallyDrop, MaybeUninit};
 use core::ptr;
 use core::sync::atomic::Ordering;
 
-use crossbeam_epoch::{unprotected, Atomic, Guard, Owned, Shared};
+use crossbeam_epoch::{pin, unprotected, Atomic, Owned, Shared};
 use crossbeam_utils::CachePadded;
+
+use crate::Queue;
 
 #[derive(Debug, Default)]
 /// Michael-Scott queue structure
@@ -21,9 +23,13 @@ pub struct Node<T> {
 }
 
 unsafe impl<T: Send> Sync for MSQueue<T> {}
-impl<T> MSQueue<T> {
+
+impl<T> Queue<T> for MSQueue<T> {
     /// Create a new, empty queue.
-    pub fn new() -> MSQueue<T> {
+    fn new() -> Self
+    where
+        Self: Sized,
+    {
         let q = MSQueue {
             head: CachePadded::new(Atomic::null()),
             tail: CachePadded::new(Atomic::null()),
@@ -41,7 +47,8 @@ impl<T> MSQueue<T> {
     }
 
     /// Adds `t` to the back of the queue, possibly waking up threads blocked on `pop`.
-    pub fn push(&self, t: T, guard: &Guard) {
+    fn push(&self, t: T) {
+        let guard = &pin();
         let node = Owned::new(Node {
             data: ManuallyDrop::new(t),
             next: Atomic::null(),
@@ -77,7 +84,8 @@ impl<T> MSQueue<T> {
 
     /// Attempts to dequeue from the front.
     /// Returns `None` if the queue is observed to be empty.
-    pub fn try_pop(&self, guard: &Guard) -> Option<T> {
+    fn try_pop(&self) -> Option<T> {
+        let guard = &pin();
         loop {
             let head = self.head.load(Ordering::Acquire, guard);
             let next = unsafe { head.deref() }.next.load(Ordering::Acquire, guard);
@@ -103,16 +111,204 @@ impl<T> MSQueue<T> {
             }
         }
     }
+
+    fn is_empty(&self) -> bool {
+        let guard = &pin();
+        let head = self.head.load(Ordering::Acquire, guard);
+        let h = unsafe { head.deref() };
+        h.next.load(Ordering::Acquire, guard).is_null()
+    }
+
+    fn pop(&self) -> T {
+        loop {
+            match self.try_pop() {
+                None => continue,
+                Some(t) => return t,
+            }
+        }
+    }
 }
 
 impl<T> Drop for MSQueue<T> {
     fn drop(&mut self) {
         unsafe {
-            while let Some(_) = self.try_pop(unprotected()) {}
+            while let Some(_) = self.try_pop() {}
 
             // Destroy the remaining sentinel node.
             let sentinel = self.head.load(Ordering::Relaxed, unprotected());
             drop(sentinel.into_owned());
         }
     }
+}
+
+mod test {
+    use super::*;
+    use crate::queue::{
+        test_is_empty_dont_pop, test_push_pop_1, test_push_pop_2, test_push_pop_empty_check,
+        test_push_pop_many_seq, test_push_try_pop_1, test_push_try_pop_2,
+        test_push_try_pop_many_seq,
+    };
+    use crossbeam_utils::thread::scope;
+
+    const CONC_COUNT: i64 = 1_000_000;
+
+    #[test]
+    fn is_empty_dont_pop() {
+        let q = Box::new(MSQueue::new());
+        test_is_empty_dont_pop(q);
+    }
+
+    #[test]
+    fn push_try_pop_1() {
+        let q = Box::new(MSQueue::new());
+        test_push_try_pop_1(q);
+    }
+
+    #[test]
+    fn push_try_pop_2() {
+        let q = Box::new(MSQueue::new());
+        test_push_try_pop_2(q);
+    }
+
+    #[test]
+    fn push_try_pop_many_seq() {
+        let q = Box::new(MSQueue::new());
+        test_push_try_pop_many_seq(q);
+    }
+
+    #[test]
+    fn push_pop_1() {
+        let q = Box::new(MSQueue::new());
+        test_push_pop_1(q);
+    }
+
+    #[test]
+    fn push_pop_2() {
+        let q = Box::new(MSQueue::new());
+        test_push_pop_2(q);
+    }
+
+    #[test]
+    fn push_pop_empty_check() {
+        let q = Box::new(MSQueue::new());
+        test_push_pop_empty_check(q);
+    }
+
+    #[test]
+    fn push_pop_many_seq() {
+        let q = Box::new(MSQueue::new());
+        test_push_pop_many_seq(q);
+    }
+
+    #[test]
+    fn test_push_pop_many_spsc() {
+        //qq: Box<dyn Queue<i64>>) {
+        let q = MSQueue::new();
+        scope(|scope| {
+            scope.spawn(|_| {
+                let mut next = 0;
+
+                while next < CONC_COUNT {
+                    if let Some(elem) = q.try_pop() {
+                        assert_eq!(elem, next);
+                        next += 1;
+                    }
+                }
+            });
+
+            for i in 0..CONC_COUNT {
+                q.push(i)
+            }
+        })
+        .unwrap();
+    }
+
+    #[test]
+    fn test_push_try_pop_many_spmc() {
+        fn recv_ms(_t: i32, q: &MSQueue<i64>) {
+            let mut cur = -1;
+            for _i in 0..CONC_COUNT {
+                if let Some(elem) = q.try_pop() {
+                    assert!(elem > cur);
+                    cur = elem;
+
+                    if cur == CONC_COUNT - 1 {
+                        break;
+                    }
+                }
+            }
+        }
+        let q = MSQueue::new();
+        assert!(q.is_empty());
+        scope(|scope| {
+            for i in 0..3 {
+                let q = &q;
+                scope.spawn(move |_| recv_ms(i, q));
+            }
+
+            scope.spawn(|_| {
+                for i in 0..CONC_COUNT {
+                    q.push(i);
+                }
+            });
+        })
+        .unwrap();
+    }
+
+    #[test]
+    fn test_push_try_pop_many_mpmc() {
+        enum LR {
+            Left(i64),
+            Right(i64),
+        }
+        let q = MSQueue::new();
+        assert!(q.is_empty());
+
+        scope(|scope| {
+            for _t in 0..2 {
+                scope.spawn(|_| {
+                    for i in CONC_COUNT - 1..CONC_COUNT {
+                        q.push(LR::Left(i))
+                    }
+                });
+                scope.spawn(|_| {
+                    for i in CONC_COUNT - 1..CONC_COUNT {
+                        q.push(LR::Right(i))
+                    }
+                });
+                scope.spawn(|_| {
+                    let mut vl = vec![];
+                    let mut vr = vec![];
+                    for _i in 0..CONC_COUNT {
+                        match q.try_pop() {
+                            Some(LR::Left(x)) => vl.push(x),
+                            Some(LR::Right(x)) => vr.push(x),
+                            _ => {}
+                        }
+                    }
+
+                    let mut vl2 = vl.clone();
+                    let mut vr2 = vr.clone();
+                    vl2.sort();
+                    vr2.sort();
+
+                    assert_eq!(vl, vl2);
+                    assert_eq!(vr, vr2);
+                });
+            }
+        })
+        .unwrap();
+    }
+    //    fn push_try_pop_many_spmc() {
+    //
+    //        let q = Box::new(MSQueue::new());
+    //        test_push_try_pop_many_spmc(q, &recv_ms);
+    //    }
+    /*
+        #[test]
+        fn push_try_pop_many_mpmc() {
+            let q = Box::new(MSQueue::new());
+            test_push_try_pop_many_mpmc(q);
+        }
+    */
 }

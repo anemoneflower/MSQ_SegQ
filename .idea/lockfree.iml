@@ -6,6 +6,7 @@
       <sourceFolder url="file://$MODULE_DIR$/../lockfree\examples" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/tests" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/../lockfree\benches" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/../lockfree\tests" isTestSource="true" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>
     <orderEntry type="inheritedJdk" />
