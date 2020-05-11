@@ -157,9 +157,8 @@ impl<T> Queue<T> for SegQueue<T> {
 
     fn pop(&self) -> T {
         loop {
-            match self.try_pop() {
-                None => continue,
-                Some(t) => return t,
+            if let Some(t) = self.try_pop() {
+                return t;
             }
         }
     }
@@ -178,11 +177,7 @@ impl<T> Drop for SegQueue<T> {
 
 mod test {
     use super::*;
-    use crate::queue::{
-        test_is_empty_dont_pop, test_push_pop_1, test_push_pop_2, test_push_pop_empty_check,
-        test_push_pop_many_seq, test_push_try_pop_1, test_push_try_pop_2,
-        test_push_try_pop_many_seq,
-    };
+    use crate::queue::*;
     use crossbeam_utils::thread::scope;
 
     const CONC_COUNT: i64 = 1_000_000;

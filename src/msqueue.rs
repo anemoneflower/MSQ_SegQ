@@ -46,7 +46,7 @@ impl<T> Queue<T> for MSQueue<T> {
         q
     }
 
-    /// Adds `t` to the back of the queue, possibly waking up threads blocked on `pop`.
+    /// Adds `t` to the back of the queue.
     fn push(&self, t: T) {
         let guard = &pin();
         let node = Owned::new(Node {
@@ -58,18 +58,8 @@ impl<T> Queue<T> for MSQueue<T> {
             // load acquire tail
             let tail = self.tail.load(Ordering::Acquire, guard);
 
-            // check if this is real tail
-            let tail_ref = unsafe { tail.deref() };
-            let next = tail_ref.next.load(Ordering::Acquire, guard);
-            if !next.is_null() {
-                // move tail pointer forward
-                let _ = self
-                    .tail
-                    .compare_and_set(tail, next, Ordering::Release, guard);
-                continue;
-            }
-
-            if tail_ref
+            // add new node to the queue
+            if unsafe { tail.deref() }
                 .next
                 .compare_and_set(Shared::null(), node, Ordering::Release, guard)
                 .is_ok()
@@ -78,6 +68,14 @@ impl<T> Queue<T> for MSQueue<T> {
                     .tail
                     .compare_and_set(tail, node, Ordering::Release, guard);
                 break;
+            } else {
+                // if tail is not real tail, move tail pointer forward
+                let _ = self.tail.compare_and_set(
+                    tail,
+                    unsafe { tail.deref() }.next.load(Ordering::Relaxed, guard),
+                    Ordering::Release,
+                    guard,
+                );
             }
         }
     }
@@ -91,7 +89,7 @@ impl<T> Queue<T> for MSQueue<T> {
             let next = unsafe { head.deref() }.next.load(Ordering::Acquire, guard);
             let nextref = some_or!(unsafe { next.as_ref() }, return None);
 
-            // Move tail
+            // Update tail pointer if it is pointing dummy node.
             let tail = self.tail.load(Ordering::Acquire, guard);
             if tail == head {
                 let _ = self
@@ -99,6 +97,7 @@ impl<T> Queue<T> for MSQueue<T> {
                     .compare_and_set(tail, next, Ordering::Release, guard);
             }
 
+            // Update head pointer to new head and return 't'.
             if self
                 .head
                 .compare_and_set(head, next, Ordering::Release, guard)
@@ -112,6 +111,7 @@ impl<T> Queue<T> for MSQueue<T> {
         }
     }
 
+    /// Check queue is empty or not.
     fn is_empty(&self) -> bool {
         let guard = &pin();
         let head = self.head.load(Ordering::Acquire, guard);
@@ -119,11 +119,11 @@ impl<T> Queue<T> for MSQueue<T> {
         h.next.load(Ordering::Acquire, guard).is_null()
     }
 
+    /// Dequeue from the front.
     fn pop(&self) -> T {
         loop {
-            match self.try_pop() {
-                None => continue,
-                Some(t) => return t,
+            if let Some(t) = self.try_pop() {
+                return t;
             }
         }
     }
@@ -143,11 +143,7 @@ impl<T> Drop for MSQueue<T> {
 
 mod test {
     use super::*;
-    use crate::queue::{
-        test_is_empty_dont_pop, test_push_pop_1, test_push_pop_2, test_push_pop_empty_check,
-        test_push_pop_many_seq, test_push_try_pop_1, test_push_try_pop_2,
-        test_push_try_pop_many_seq,
-    };
+    use crate::queue::*;
     use crossbeam_utils::thread::scope;
 
     const CONC_COUNT: i64 = 1_000_000;
@@ -299,16 +295,4 @@ mod test {
         })
         .unwrap();
     }
-    //    fn push_try_pop_many_spmc() {
-    //
-    //        let q = Box::new(MSQueue::new());
-    //        test_push_try_pop_many_spmc(q, &recv_ms);
-    //    }
-    /*
-        #[test]
-        fn push_try_pop_many_mpmc() {
-            let q = Box::new(MSQueue::new());
-            test_push_try_pop_many_mpmc(q);
-        }
-    */
 }

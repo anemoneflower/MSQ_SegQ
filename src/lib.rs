@@ -11,7 +11,6 @@ mod utils;
 mod msqueue;
 mod queue;
 mod segqueue;
-//mod test_ftns;
 
 pub use msqueue::MSQueue;
 pub use queue::Queue;
