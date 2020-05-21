@@ -11,7 +11,6 @@ pub trait Queue<T> {
 }
 
 const CONC_COUNT: i64 = 1_000_000;
-use crossbeam_utils::thread::scope;
 
 pub fn test_push_try_pop_1(qq: Box<dyn Queue<i64>>) {
     let q = qq.deref();

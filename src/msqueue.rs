@@ -12,14 +12,13 @@ use crate::Queue;
 #[derive(Debug, Default)]
 /// Michael-Scott queue structure
 pub struct MSQueue<T> {
-    pub(crate) head: CachePadded<Atomic<Node<T>>>,
+    head: CachePadded<Atomic<Node<T>>>,
     tail: CachePadded<Atomic<Node<T>>>,
 }
 
-#[derive(Debug)]
 pub struct Node<T> {
     data: ManuallyDrop<T>,
-    pub(crate) next: Atomic<Node<T>>,
+    next: Atomic<Node<T>>,
 }
 
 unsafe impl<T: Send> Sync for MSQueue<T> {}
@@ -28,7 +27,7 @@ impl<T> Queue<T> for MSQueue<T> {
     /// Create a new, empty queue.
     fn new() -> Self
     where
-        Self: Sized,
+        T: Sized,
     {
         let q = MSQueue {
             head: CachePadded::new(Atomic::null()),
@@ -68,15 +67,15 @@ impl<T> Queue<T> for MSQueue<T> {
                     .tail
                     .compare_and_set(tail, node, Ordering::Release, guard);
                 break;
-            } else {
-                // if tail is not real tail, move tail pointer forward
-                let _ = self.tail.compare_and_set(
-                    tail,
-                    unsafe { tail.deref() }.next.load(Ordering::Relaxed, guard),
-                    Ordering::Release,
-                    guard,
-                );
             }
+
+            // if tail is not real tail, move tail pointer forward
+            let _ = self.tail.compare_and_set(
+                tail,
+                unsafe { tail.deref() }.next.load(Ordering::Relaxed, guard),
+                Ordering::Release,
+                guard,
+            );
         }
     }
 
@@ -198,7 +197,6 @@ mod test {
 
     #[test]
     fn test_push_pop_many_spsc() {
-        //qq: Box<dyn Queue<i64>>) {
         let q = MSQueue::new();
         scope(|scope| {
             scope.spawn(|_| {
