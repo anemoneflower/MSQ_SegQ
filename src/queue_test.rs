@@ -1,18 +1,8 @@
 use std::ops::Deref;
 
-pub trait Queue<T> {
-    fn new() -> Self
-    where
-        Self: Sized;
-    fn push(&self, t: T);
-    fn try_pop(&self) -> Option<T>;
-    fn is_empty(&self) -> bool;
-    fn pop(&self) -> T;
-}
+use crate::Queue;
 
-const CONC_COUNT: i64 = 1_000_000;
-
-pub fn test_push_try_pop_1(qq: Box<dyn Queue<i64>>) {
+pub fn test_push_try_pop_1<Q: Queue<i64>>(qq: &Q) {
     let q = qq.deref();
     assert!(q.is_empty());
     q.push(37);
@@ -20,7 +10,7 @@ pub fn test_push_try_pop_1(qq: Box<dyn Queue<i64>>) {
     assert_eq!(q.try_pop(), Some(37));
     assert!(q.is_empty());
 }
-pub fn test_push_try_pop_2(qq: Box<dyn Queue<i64>>) {
+pub fn test_push_try_pop_2<Q: Queue<i64>>(qq: &Q) {
     let q = qq.deref();
     assert!(q.is_empty());
     q.push(37);
@@ -31,7 +21,7 @@ pub fn test_push_try_pop_2(qq: Box<dyn Queue<i64>>) {
     assert!(q.is_empty());
 }
 
-pub fn test_push_try_pop_many_seq(qq: Box<dyn Queue<i64>>) {
+pub fn test_push_try_pop_many_seq<Q: Queue<i64>>(qq: &Q) {
     let q = qq.deref();
     assert!(q.is_empty());
     for i in 0..200 {
@@ -44,7 +34,7 @@ pub fn test_push_try_pop_many_seq(qq: Box<dyn Queue<i64>>) {
     assert!(q.is_empty());
 }
 
-pub fn test_push_pop_1(qq: Box<dyn Queue<i64>>) {
+pub fn test_push_pop_1<Q: Queue<i64>>(qq: &Q) {
     let q = qq.deref();
     assert!(q.is_empty());
     q.push(37);
@@ -53,7 +43,7 @@ pub fn test_push_pop_1(qq: Box<dyn Queue<i64>>) {
     assert!(q.is_empty());
 }
 
-pub fn test_push_pop_2(qq: Box<dyn Queue<i64>>) {
+pub fn test_push_pop_2<Q: Queue<i64>>(qq: &Q) {
     let q = qq.deref();
     q.push(37);
     q.push(48);
@@ -61,7 +51,7 @@ pub fn test_push_pop_2(qq: Box<dyn Queue<i64>>) {
     assert_eq!(q.pop(), 48);
 }
 
-pub fn test_push_pop_empty_check(qq: Box<dyn Queue<i64>>) {
+pub fn test_push_pop_empty_check<Q: Queue<i64>>(qq: &Q) {
     let q = qq.deref();
     assert_eq!(q.is_empty(), true);
     q.push(42);
@@ -70,7 +60,7 @@ pub fn test_push_pop_empty_check(qq: Box<dyn Queue<i64>>) {
     assert_eq!(q.is_empty(), true);
 }
 
-pub fn test_push_pop_many_seq(qq: Box<dyn Queue<i64>>) {
+pub fn test_push_pop_many_seq<Q: Queue<i64>>(qq: &Q) {
     let q = qq.deref();
     assert!(q.is_empty());
     for i in 0..200 {
@@ -83,7 +73,7 @@ pub fn test_push_pop_many_seq(qq: Box<dyn Queue<i64>>) {
     assert!(q.is_empty());
 }
 
-pub fn test_is_empty_dont_pop(qq: Box<dyn Queue<i64>>) {
+pub fn test_is_empty_dont_pop<Q: Queue<i64>>(qq: &Q) {
     let q = qq.deref();
     q.push(20);
     q.push(20);

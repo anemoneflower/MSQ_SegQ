@@ -1,6 +1,6 @@
 //! msqueue => skeleton from cs492-concur-master/lockfree/queue
 
-use core::mem::{ManuallyDrop, MaybeUninit};
+use core::mem::MaybeUninit;
 use core::ptr;
 use core::sync::atomic::Ordering;
 
@@ -17,7 +17,7 @@ pub struct MSQueue<T> {
 }
 
 pub struct Node<T> {
-    data: ManuallyDrop<T>,
+    data: MaybeUninit<T>,
     next: Atomic<Node<T>>,
 }
 
@@ -49,7 +49,7 @@ impl<T> Queue<T> for MSQueue<T> {
     fn push(&self, t: T) {
         let guard = &pin();
         let node = Owned::new(Node {
-            data: ManuallyDrop::new(t),
+            data: MaybeUninit::new(t),
             next: Atomic::null(),
         });
         let node = node.into_shared(guard);
@@ -104,7 +104,7 @@ impl<T> Queue<T> for MSQueue<T> {
             {
                 unsafe {
                     guard.defer_destroy(head);
-                    return Some(ManuallyDrop::into_inner(ptr::read(&nextref.data)));
+                    return Some(ptr::read(&nextref.data).assume_init());
                 }
             }
         }
@@ -139,59 +139,60 @@ impl<T> Drop for MSQueue<T> {
     }
 }
 
+#[cfg(test)]
 mod tests {
     use super::*;
-    use crate::queue::*;
+    use crate::queue_test::*;
     use crossbeam_utils::thread::scope;
 
     const CONC_COUNT: i64 = 1_000_000;
 
     #[test]
     fn is_empty_dont_pop() {
-        let q = Box::new(MSQueue::new());
-        test_is_empty_dont_pop(q);
+        let q = MSQueue::new();
+        test_is_empty_dont_pop(&q);
     }
 
     #[test]
     fn push_try_pop_1() {
-        let q = Box::new(MSQueue::new());
-        test_push_try_pop_1(q);
+        let q = MSQueue::new();
+        test_push_try_pop_1(&q);
     }
 
     #[test]
     fn push_try_pop_2() {
-        let q = Box::new(MSQueue::new());
-        test_push_try_pop_2(q);
+        let q = MSQueue::new();
+        test_push_try_pop_2(&q);
     }
 
     #[test]
     fn push_try_pop_many_seq() {
-        let q = Box::new(MSQueue::new());
-        test_push_try_pop_many_seq(q);
+        let q = MSQueue::new();
+        test_push_try_pop_many_seq(&q);
     }
 
     #[test]
     fn push_pop_1() {
-        let q = Box::new(MSQueue::new());
-        test_push_pop_1(q);
+        let q = MSQueue::new();
+        test_push_pop_1(&q);
     }
 
     #[test]
     fn push_pop_2() {
-        let q = Box::new(MSQueue::new());
-        test_push_pop_2(q);
+        let q = MSQueue::new();
+        test_push_pop_2(&q);
     }
 
     #[test]
     fn push_pop_empty_check() {
-        let q = Box::new(MSQueue::new());
-        test_push_pop_empty_check(q);
+        let q = MSQueue::new();
+        test_push_pop_empty_check(&q);
     }
 
     #[test]
     fn push_pop_many_seq() {
-        let q = Box::new(MSQueue::new());
-        test_push_pop_many_seq(q);
+        let q = MSQueue::new();
+        test_push_pop_many_seq(&q);
     }
 
     #[test]

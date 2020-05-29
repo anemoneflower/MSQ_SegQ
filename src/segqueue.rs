@@ -4,7 +4,7 @@ use core::mem::MaybeUninit;
 use core::ptr;
 use core::sync::atomic::Ordering;
 
-use crossbeam_epoch::{pin, unprotected, Atomic, Owned, Shared};
+use crossbeam_epoch::{pin, unprotected, Atomic, Owned};
 
 use crate::Queue;
 use std::cmp;
@@ -28,6 +28,7 @@ pub struct Segment<T> {
 unsafe impl<T: Send> Sync for Segment<T> {}
 impl<T> Segment<T> {
     fn new() -> Segment<T> {
+        #[allow(clippy::uninit_assumed_init)]
         let s = Segment {
             low: AtomicUsize::new(0),
             high: AtomicUsize::new(0),
@@ -103,7 +104,8 @@ impl<T> Queue<T> for SegQueue<T> {
             loop {
                 let low = head_ref.low.load(Ordering::Relaxed);
                 if low >= cmp::min(head_ref.high.load(Ordering::Relaxed), SEG_SIZE) {
-                    // Need to use 'min' because, high might be bigger than SEG_SIZE if there is case like cur_high >= SEG_SIZE in push() function(line 91).
+                    // Need to use 'min' because, high might be bigger than SEG_SIZE if there is
+                    // case like cur_high >= SEG_SIZE in push() function(line 91).
                     break;
                 }
                 if head_ref
@@ -177,59 +179,60 @@ impl<T> Drop for SegQueue<T> {
     }
 }
 
+#[cfg(test)]
 mod tests {
     use super::*;
-    use crate::queue::*;
+    use crate::queue_test::*;
     use crossbeam_utils::thread::scope;
 
     const CONC_COUNT: i64 = 1_000_000;
 
     #[test]
     fn is_empty_dont_pop() {
-        let q = Box::new(SegQueue::new());
-        test_is_empty_dont_pop(q);
+        let q = SegQueue::new();
+        test_is_empty_dont_pop(&q);
     }
 
     #[test]
     fn push_try_pop_1() {
-        let q = Box::new(SegQueue::new());
-        test_push_try_pop_1(q);
+        let q = SegQueue::new();
+        test_push_try_pop_1(&q);
     }
 
     #[test]
     fn push_try_pop_2() {
-        let q = Box::new(SegQueue::new());
-        test_push_try_pop_2(q);
+        let q = SegQueue::new();
+        test_push_try_pop_2(&q);
     }
 
     #[test]
     fn push_try_pop_many_seq() {
-        let q = Box::new(SegQueue::new());
-        test_push_try_pop_many_seq(q);
+        let q = SegQueue::new();
+        test_push_try_pop_many_seq(&q);
     }
 
     #[test]
     fn push_pop_1() {
-        let q = Box::new(SegQueue::new());
-        test_push_pop_1(q);
+        let q = SegQueue::new();
+        test_push_pop_1(&q);
     }
 
     #[test]
     fn push_pop_2() {
-        let q = Box::new(SegQueue::new());
-        test_push_pop_2(q);
+        let q = SegQueue::new();
+        test_push_pop_2(&q);
     }
 
     #[test]
     fn push_pop_empty_check() {
-        let q = Box::new(SegQueue::new());
-        test_push_pop_empty_check(q);
+        let q = SegQueue::new();
+        test_push_pop_empty_check(&q);
     }
 
     #[test]
     fn push_pop_many_seq() {
-        let q = Box::new(SegQueue::new());
-        test_push_pop_many_seq(q);
+        let q = SegQueue::new();
+        test_push_pop_many_seq(&q);
     }
 
     #[test]
