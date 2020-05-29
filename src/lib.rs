@@ -8,29 +8,8 @@ extern crate crossbeam_utils;
 
 #[macro_use]
 mod utils;
+mod queue; //segqueue
 mod msqueue;
-mod segqueue;
 
-#[cfg(test)]
-mod queue_test;
-
-/// TODO
-pub trait Queue<T> {
-    /// TODO
-    fn new() -> Self;
-
-    /// TODO
-    fn push(&self, t: T);
-
-    /// TODO
-    fn try_pop(&self) -> Option<T>;
-
-    /// TODO
-    fn is_empty(&self) -> bool;
-
-    /// TODO
-    fn pop(&self) -> T;
-}
-
+pub use queue::Queue;
 pub use msqueue::MSQueue;
-pub use segqueue::SegQueue;
