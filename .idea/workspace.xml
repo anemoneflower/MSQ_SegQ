@@ -13,17 +13,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="874c837e-7d93-4c0d-b397-491bdeb533f4" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/deployment.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/lockfree.iml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Cargo.toml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/lib.rs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/msqueue.rs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/queue.rs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/utils.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/msqueue.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/msqueue.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/segqueue.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/segqueue.rs" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -33,6 +25,13 @@
   </component>
   <component name="ClangdSettings">
     <option name="formatViaClangd" value="false" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Rust File" />
+      </list>
+    </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -65,10 +64,10 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Cargo Command.Test msqueue">
-    <configuration name="Test msqueue" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
+  <component name="RunManager" selected="Cargo Command.Test msqueue::test">
+    <configuration name="Test msqueue::test" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
       <option name="channel" value="DEFAULT" />
-      <option name="command" value="test --package lockfree --lib msqueue" />
+      <option name="command" value="test --package queues --lib msqueue::test" />
       <option name="allFeatures" value="false" />
       <option name="nocapture" value="false" />
       <option name="emulateTerminal" value="false" />
@@ -79,9 +78,9 @@
         <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
       </method>
     </configuration>
-    <configuration name="Test queue" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
+    <configuration name="Test msqueue::test::test_push_try_pop_many_mpmc" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
       <option name="channel" value="DEFAULT" />
-      <option name="command" value="test --package lockfree --lib queue" />
+      <option name="command" value="test --package queues --lib msqueue::test::test_push_try_pop_many_mpmc -- --exact" />
       <option name="allFeatures" value="false" />
       <option name="nocapture" value="false" />
       <option name="emulateTerminal" value="false" />
@@ -92,9 +91,9 @@
         <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
       </method>
     </configuration>
-    <configuration name="Test queue::test::is_empty_dont_pop" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
+    <configuration name="Test segqueue::test" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
       <option name="channel" value="DEFAULT" />
-      <option name="command" value="test --package lockfree --lib queue::test::is_empty_dont_pop -- --exact" />
+      <option name="command" value="test --package queues --lib segqueue::test" />
       <option name="allFeatures" value="false" />
       <option name="nocapture" value="false" />
       <option name="emulateTerminal" value="false" />
@@ -105,9 +104,9 @@
         <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
       </method>
     </configuration>
-    <configuration name="Test queue::test::push_pop_many_spsc" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
+    <configuration name="Test segqueue::test::test_push_pop_many_spsc" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
       <option name="channel" value="DEFAULT" />
-      <option name="command" value="test --package lockfree --lib queue::test::push_pop_many_spsc -- --exact" />
+      <option name="command" value="test --package queues --lib segqueue::test::test_push_pop_many_spsc -- --exact" />
       <option name="allFeatures" value="false" />
       <option name="nocapture" value="false" />
       <option name="emulateTerminal" value="false" />
@@ -118,9 +117,9 @@
         <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
       </method>
     </configuration>
-    <configuration name="Test queue::test::push_try_pop_many_mpmc" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
+    <configuration name="Test segqueue::test::test_push_try_pop_many_mpmc" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
       <option name="channel" value="DEFAULT" />
-      <option name="command" value="test --package lockfree --lib queue::test::push_try_pop_many_mpmc -- --exact" />
+      <option name="command" value="test --package queues --lib segqueue::test::test_push_try_pop_many_mpmc -- --exact" />
       <option name="allFeatures" value="false" />
       <option name="nocapture" value="false" />
       <option name="emulateTerminal" value="false" />
@@ -133,11 +132,11 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Cargo Command.Test msqueue" />
-        <item itemvalue="Cargo Command.Test queue" />
-        <item itemvalue="Cargo Command.Test queue::test::is_empty_dont_pop" />
-        <item itemvalue="Cargo Command.Test queue::test::push_pop_many_spsc" />
-        <item itemvalue="Cargo Command.Test queue::test::push_try_pop_many_mpmc" />
+        <item itemvalue="Cargo Command.Test msqueue::test" />
+        <item itemvalue="Cargo Command.Test segqueue::test" />
+        <item itemvalue="Cargo Command.Test segqueue::test::test_push_pop_many_spsc" />
+        <item itemvalue="Cargo Command.Test segqueue::test::test_push_try_pop_many_mpmc" />
+        <item itemvalue="Cargo Command.Test msqueue::test::test_push_try_pop_many_mpmc" />
       </list>
     </recent_temporary>
   </component>
@@ -157,7 +156,21 @@
       <updated>1582867726710</updated>
       <workItem from="1582867728536" duration="3106000" />
       <workItem from="1583762147923" duration="201000" />
-      <workItem from="1587126126385" duration="699000" />
+      <workItem from="1587126126385" duration="1302000" />
+      <workItem from="1587179253286" duration="1228000" />
+      <workItem from="1587231900839" duration="803000" />
+      <workItem from="1587296819492" duration="13559000" />
+      <workItem from="1587878713921" duration="8179000" />
+      <workItem from="1588175560516" duration="2293000" />
+      <workItem from="1588181713701" duration="96000" />
+      <workItem from="1588839495870" duration="887000" />
+      <workItem from="1589076483600" duration="9733000" />
+      <workItem from="1589206155008" duration="4682000" />
+      <workItem from="1589301320787" duration="55000" />
+      <workItem from="1589975191435" duration="10268000" />
+      <workItem from="1590065536240" duration="6506000" />
+      <workItem from="1590385842792" duration="4340000" />
+      <workItem from="1590728004680" duration="1021000" />
     </task>
     <servers />
   </component>
@@ -169,7 +182,9 @@
       <map>
         <entry key="MAIN">
           <value>
-            <State />
+            <State>
+              <option name="COLUMN_ORDER" />
+            </State>
           </value>
         </entry>
       </map>
