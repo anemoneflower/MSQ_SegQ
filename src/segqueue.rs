@@ -51,12 +51,12 @@ impl<T> Queue<T> for SegQueue<T> {
             head: Atomic::null(),
             tail: Atomic::null(),
         };
+
         let sentinel = Owned::new(Segment::new());
-        unsafe {
-            let sentinel = sentinel.into_shared(&unprotected());
-            q.head.store(sentinel, Ordering::Relaxed);
-            q.tail.store(sentinel, Ordering::Relaxed);
-        }
+        let sentinel = unsafe { sentinel.into_shared(&unprotected()) };
+        q.head.store(sentinel, Ordering::Relaxed);
+        q.tail.store(sentinel, Ordering::Relaxed);
+
         q
     }
 
@@ -70,24 +70,25 @@ impl<T> Queue<T> for SegQueue<T> {
             //check if this is real tail
             if tail.high.load(Ordering::Relaxed) >= SEG_SIZE {
                 continue;
-                // TODO: try to allocate next node here
             }
 
             let cur_high = tail.high.fetch_add(1, Ordering::Relaxed);
-            unsafe {
-                if cur_high >= SEG_SIZE {
-                    continue;
-                }
-                let cell = (*tail).data.get_unchecked_mut(cur_high);
-                cell.0.as_mut_ptr().write(t);
-                (*cell).1.store(true, Ordering::Release);
-                if cur_high + 1 == SEG_SIZE {
-                    let new_tail = Owned::new(Segment::new()).into_shared(guard);
-                    tail.next.store(new_tail, Ordering::Release);
-                    self.tail.store(new_tail, Ordering::Release);
-                }
-                return;
+            if cur_high >= SEG_SIZE {
+                continue;
             }
+
+            let cell;
+            unsafe {
+                cell = (*tail).data.get_unchecked_mut(cur_high);
+                cell.0.as_mut_ptr().write(t);
+            }
+            (*cell).1.store(true, Ordering::Release);
+            if cur_high + 1 == SEG_SIZE {
+                let new_tail = Owned::new(Segment::new()).into_shared(guard);
+                tail.next.store(new_tail, Ordering::Release);
+                self.tail.store(new_tail, Ordering::Release);
+            }
+            return;
         }
     }
 
@@ -167,8 +168,8 @@ impl<T> Queue<T> for SegQueue<T> {
 
 impl<T> Drop for SegQueue<T> {
     fn drop(&mut self) {
+        while self.try_pop().is_some() {}
         unsafe {
-            while self.try_pop().is_some() {}
             // Destroy the remaining sentinel node.
             let sentinel = self.head.load(Ordering::Relaxed, unprotected());
             drop(sentinel.into_owned());
@@ -176,7 +177,7 @@ impl<T> Drop for SegQueue<T> {
     }
 }
 
-mod test {
+mod tests {
     use super::*;
     use crate::queue::*;
     use crossbeam_utils::thread::scope;

@@ -13,10 +13,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="874c837e-7d93-4c0d-b397-491bdeb533f4" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/queue.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/lockfree.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/lockfree.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/msqueue.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/msqueue.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/segqueue.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/segqueue.rs" afterDir="false" />
     </list>
@@ -81,32 +78,6 @@
         <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
       </method>
     </configuration>
-    <configuration name="Test msqueue::test::push_pop_many_spsc" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
-      <option name="channel" value="DEFAULT" />
-      <option name="command" value="test --package queues --lib msqueue::test::push_pop_many_spsc -- --exact" />
-      <option name="allFeatures" value="false" />
-      <option name="nocapture" value="false" />
-      <option name="emulateTerminal" value="false" />
-      <option name="backtrace" value="SHORT" />
-      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
-      <envs />
-      <method v="2">
-        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="Test msqueue::test::test_push_pop_many_spsc" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
-      <option name="channel" value="DEFAULT" />
-      <option name="command" value="test --package queues --lib msqueue::test::test_push_pop_many_spsc -- --exact" />
-      <option name="allFeatures" value="false" />
-      <option name="nocapture" value="false" />
-      <option name="emulateTerminal" value="false" />
-      <option name="backtrace" value="SHORT" />
-      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
-      <envs />
-      <method v="2">
-        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
-      </method>
-    </configuration>
     <configuration name="Test msqueue::test::test_push_try_pop_many_mpmc" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
       <option name="channel" value="DEFAULT" />
       <option name="command" value="test --package queues --lib msqueue::test::test_push_try_pop_many_mpmc -- --exact" />
@@ -133,13 +104,39 @@
         <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
       </method>
     </configuration>
+    <configuration name="Test segqueue::test::test_push_pop_many_spsc" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
+      <option name="channel" value="DEFAULT" />
+      <option name="command" value="test --package queues --lib segqueue::test::test_push_pop_many_spsc -- --exact" />
+      <option name="allFeatures" value="false" />
+      <option name="nocapture" value="false" />
+      <option name="emulateTerminal" value="false" />
+      <option name="backtrace" value="SHORT" />
+      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
+      <envs />
+      <method v="2">
+        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Test segqueue::test::test_push_try_pop_many_mpmc" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
+      <option name="channel" value="DEFAULT" />
+      <option name="command" value="test --package queues --lib segqueue::test::test_push_try_pop_many_mpmc -- --exact" />
+      <option name="allFeatures" value="false" />
+      <option name="nocapture" value="false" />
+      <option name="emulateTerminal" value="false" />
+      <option name="backtrace" value="SHORT" />
+      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
+      <envs />
+      <method v="2">
+        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
+      </method>
+    </configuration>
     <recent_temporary>
       <list>
         <item itemvalue="Cargo Command.Test msqueue::test" />
         <item itemvalue="Cargo Command.Test segqueue::test" />
+        <item itemvalue="Cargo Command.Test segqueue::test::test_push_pop_many_spsc" />
+        <item itemvalue="Cargo Command.Test segqueue::test::test_push_try_pop_many_mpmc" />
         <item itemvalue="Cargo Command.Test msqueue::test::test_push_try_pop_many_mpmc" />
-        <item itemvalue="Cargo Command.Test msqueue::test::test_push_pop_many_spsc" />
-        <item itemvalue="Cargo Command.Test msqueue::test::push_pop_many_spsc" />
       </list>
     </recent_temporary>
   </component>
@@ -167,7 +164,13 @@
       <workItem from="1588175560516" duration="2293000" />
       <workItem from="1588181713701" duration="96000" />
       <workItem from="1588839495870" duration="887000" />
-      <workItem from="1589076483600" duration="8946000" />
+      <workItem from="1589076483600" duration="9733000" />
+      <workItem from="1589206155008" duration="4682000" />
+      <workItem from="1589301320787" duration="55000" />
+      <workItem from="1589975191435" duration="10268000" />
+      <workItem from="1590065536240" duration="6506000" />
+      <workItem from="1590385842792" duration="4340000" />
+      <workItem from="1590728004680" duration="1021000" />
     </task>
     <servers />
   </component>

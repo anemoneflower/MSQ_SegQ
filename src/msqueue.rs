@@ -37,11 +37,11 @@ impl<T> Queue<T> for MSQueue<T> {
             data: unsafe { MaybeUninit::uninit().assume_init() },
             next: Atomic::null(),
         });
-        unsafe {
-            let sentinel = sentinel.into_shared(&unprotected());
-            q.head.store(sentinel, Ordering::Relaxed);
-            q.tail.store(sentinel, Ordering::Relaxed);
-        }
+
+        let sentinel = unsafe { sentinel.into_shared(&unprotected()) };
+        q.head.store(sentinel, Ordering::Relaxed);
+        q.tail.store(sentinel, Ordering::Relaxed);
+
         q
     }
 
@@ -86,7 +86,7 @@ impl<T> Queue<T> for MSQueue<T> {
         loop {
             let head = self.head.load(Ordering::Acquire, guard);
             let next = unsafe { head.deref() }.next.load(Ordering::Acquire, guard);
-            let nextref = some_or!(unsafe { next.as_ref() }, return None);
+            let nextref = unsafe { next.as_ref() }?;
 
             // Update tail pointer if it is pointing dummy node.
             let tail = self.tail.load(Ordering::Acquire, guard);
@@ -130,9 +130,8 @@ impl<T> Queue<T> for MSQueue<T> {
 
 impl<T> Drop for MSQueue<T> {
     fn drop(&mut self) {
+        while let Some(_) = self.try_pop() {}
         unsafe {
-            while let Some(_) = self.try_pop() {}
-
             // Destroy the remaining sentinel node.
             let sentinel = self.head.load(Ordering::Relaxed, unprotected());
             drop(sentinel.into_owned());
@@ -140,7 +139,7 @@ impl<T> Drop for MSQueue<T> {
     }
 }
 
-mod test {
+mod tests {
     use super::*;
     use crate::queue::*;
     use crossbeam_utils::thread::scope;
