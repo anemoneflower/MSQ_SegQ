@@ -6,9 +6,11 @@ use core::sync::atomic::Ordering;
 
 use crossbeam_epoch::{pin, unprotected, Atomic, Owned};
 
-use crate::Queue;
 use std::cmp;
 use std::sync::atomic::{AtomicBool, AtomicUsize};
+
+use crate::Queue;
+
 const SEG_SIZE: usize = 32;
 
 #[derive(Debug, Default)]
@@ -28,7 +30,6 @@ pub struct Segment<T> {
 unsafe impl<T: Send> Sync for Segment<T> {}
 impl<T> Segment<T> {
     fn new() -> Segment<T> {
-        #[allow(clippy::uninit_assumed_init)]
         let s = Segment {
             low: AtomicUsize::new(0),
             high: AtomicUsize::new(0),
@@ -43,7 +44,6 @@ impl<T> Segment<T> {
 }
 
 impl<T> Queue<T> for SegQueue<T> {
-    /// Create a new, empty queue.
     fn new() -> Self
     where
         T: Sized,
@@ -61,7 +61,6 @@ impl<T> Queue<T> for SegQueue<T> {
         q
     }
 
-    /// Push
     fn push(&self, t: T) {
         let guard = &pin();
 
@@ -93,7 +92,6 @@ impl<T> Queue<T> for SegQueue<T> {
         }
     }
 
-    /// Pop
     fn try_pop(&self) -> Option<T> {
         let guard = &pin();
 
@@ -103,39 +101,35 @@ impl<T> Queue<T> for SegQueue<T> {
 
             loop {
                 let low = head_ref.low.load(Ordering::Relaxed);
-                if low >= cmp::min(head_ref.high.load(Ordering::Relaxed), SEG_SIZE) {
-                    // Need to use 'min' because, high might be bigger than SEG_SIZE if there is
-                    // case like cur_high >= SEG_SIZE in push() function(line 91).
+                // If head is empty, load head again.
+                if low >= head_ref.high.load(Ordering::Relaxed) {
                     break;
                 }
+
                 if head_ref
                     .low
                     .compare_exchange(low, low + 1, Ordering::Acquire, Ordering::Relaxed)
                     .is_ok()
                 {
                     let cell = unsafe { (*head_ref).data.get_unchecked(low) };
-                    loop {
-                        if (*cell).1.load(Ordering::Acquire) {
-                            break;
-                        }
-                    }
+                    while !(*cell).1.load(Ordering::Acquire) {}
                     // check end of segment
-                    if low + 1 == SEG_SIZE {
-                        loop {
-                            // load next segment
-                            let next_head = head_ref.next.load(Ordering::Acquire, guard);
-                            if unsafe { next_head.as_ref() }.is_some()
-                                && self
-                                    .head
-                                    .compare_and_set(head, next_head, Ordering::Release, guard)
-                                    .is_ok()
-                            {
-                                unsafe { guard.defer_destroy(head) };
-                                break;
-                            }
+                    if low + 1 != SEG_SIZE {
+                        return unsafe { Some(ptr::read((*cell).0.as_ptr())) };
+                    }
+                    loop {
+                        // load next segment
+                        let next_head = head_ref.next.load(Ordering::Acquire, guard);
+                        if unsafe { next_head.as_ref() }.is_some()
+                            && self
+                                .head
+                                .compare_and_set(head, next_head, Ordering::Release, guard)
+                                .is_ok()
+                        {
+                            unsafe { guard.defer_destroy(head) };
+                            return unsafe { Some(ptr::read((*cell).0.as_ptr())) };
                         }
                     }
-                    return unsafe { Some(ptr::read((*cell).0.as_ptr())) };
                 }
             }
             // check empty queue
@@ -153,10 +147,10 @@ impl<T> Queue<T> for SegQueue<T> {
             return false;
         }
         let h = unsafe { head.deref() };
-        if h.low.load(Ordering::Relaxed) >= cmp::min(h.high.load(Ordering::Relaxed), SEG_SIZE) {
-            return true;
+        if h.low.load(Ordering::Relaxed) < cmp::min(h.high.load(Ordering::Relaxed), SEG_SIZE) {
+            return false;
         }
-        false
+        true
     }
 
     fn pop(&self) -> T {
@@ -183,9 +177,6 @@ impl<T> Drop for SegQueue<T> {
 mod tests {
     use super::*;
     use crate::queue_test::*;
-    use crossbeam_utils::thread::scope;
-
-    const CONC_COUNT: i64 = 1_000_000;
 
     #[test]
     fn is_empty_dont_pop() {
@@ -236,101 +227,20 @@ mod tests {
     }
 
     #[test]
-    fn test_push_pop_many_spsc() {
+    fn push_pop_many_spsc() {
         let q = SegQueue::new();
-        scope(|scope| {
-            scope.spawn(|_| {
-                let mut next = 0;
-
-                while next < CONC_COUNT {
-                    if let Some(elem) = q.try_pop() {
-                        assert_eq!(elem, next);
-                        next += 1;
-                    }
-                }
-            });
-
-            for i in 0..CONC_COUNT {
-                q.push(i)
-            }
-        })
-        .unwrap();
+        test_push_pop_many_spsc(&q);
     }
 
     #[test]
-    fn test_push_try_pop_many_spmc() {
-        fn recv_seg(_t: i32, q: &SegQueue<i64>) {
-            let mut cur = -1;
-            for _i in 0..CONC_COUNT {
-                if let Some(elem) = q.try_pop() {
-                    assert!(elem > cur);
-                    cur = elem;
-
-                    if cur == CONC_COUNT - 1 {
-                        break;
-                    }
-                }
-            }
-        }
+    fn push_try_pop_many_spmc() {
         let q = SegQueue::new();
-        assert!(q.is_empty());
-        scope(|scope| {
-            for i in 0..3 {
-                let q = &q;
-                scope.spawn(move |_| recv_seg(i, q));
-            }
-
-            scope.spawn(|_| {
-                for i in 0..CONC_COUNT {
-                    q.push(i);
-                }
-            });
-        })
-        .unwrap();
+        test_push_try_pop_many_spmc(&q);
     }
 
     #[test]
-    fn test_push_try_pop_many_mpmc() {
-        enum LR {
-            Left(i64),
-            Right(i64),
-        }
+    fn push_try_pop_many_mpmc() {
         let q = SegQueue::new();
-        assert!(q.is_empty());
-
-        scope(|scope| {
-            for _t in 0..2 {
-                scope.spawn(|_| {
-                    for i in CONC_COUNT - 1..CONC_COUNT {
-                        q.push(LR::Left(i))
-                    }
-                });
-                scope.spawn(|_| {
-                    for i in CONC_COUNT - 1..CONC_COUNT {
-                        q.push(LR::Right(i))
-                    }
-                });
-                scope.spawn(|_| {
-                    let mut vl = vec![];
-                    let mut vr = vec![];
-                    for _i in 0..CONC_COUNT {
-                        match q.try_pop() {
-                            Some(LR::Left(x)) => vl.push(x),
-                            Some(LR::Right(x)) => vr.push(x),
-                            _ => {}
-                        }
-                    }
-
-                    let mut vl2 = vl.clone();
-                    let mut vr2 = vr.clone();
-                    vl2.sort();
-                    vr2.sort();
-
-                    assert_eq!(vl, vl2);
-                    assert_eq!(vr, vr2);
-                });
-            }
-        })
-        .unwrap();
+        test_push_try_pop_many_mpmc(&q);
     }
 }

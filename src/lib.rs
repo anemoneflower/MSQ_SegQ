@@ -14,21 +14,22 @@ mod segqueue;
 #[cfg(test)]
 mod queue_test;
 
-/// TODO
+/// Queue trait to implement MSQueue and SegQueue
 pub trait Queue<T> {
-    /// TODO
+    /// Create a new, empty queue.
     fn new() -> Self;
 
-    /// TODO
+    /// Adds `t` to the back of the queue.
     fn push(&self, t: T);
 
-    /// TODO
+    /// Attempts to dequeue from the front.
+    /// Returns `None` if the queue is observed to be empty.
     fn try_pop(&self) -> Option<T>;
 
-    /// TODO
+    /// Check queue is empty or not.
     fn is_empty(&self) -> bool;
 
-    /// TODO
+    /// Dequeue from the front.
     fn pop(&self) -> T;
 }
 

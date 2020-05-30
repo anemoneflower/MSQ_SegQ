@@ -13,8 +13,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="874c837e-7d93-4c0d-b397-491bdeb533f4" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/lockfree.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/lockfree.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/msqueue.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/msqueue.rs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/queue_test.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/queue_test.rs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/segqueue.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/segqueue.rs" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -64,10 +67,10 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Cargo Command.Test msqueue::test">
-    <configuration name="Test msqueue::test" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
+  <component name="RunManager" selected="Cargo Command.Test segqueue::tests">
+    <configuration name="Test msqueue::tests" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
       <option name="channel" value="DEFAULT" />
-      <option name="command" value="test --package queues --lib msqueue::test" />
+      <option name="command" value="test --package queues --lib msqueue::tests" />
       <option name="allFeatures" value="false" />
       <option name="nocapture" value="false" />
       <option name="emulateTerminal" value="false" />
@@ -78,9 +81,9 @@
         <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
       </method>
     </configuration>
-    <configuration name="Test msqueue::test::test_push_try_pop_many_mpmc" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
+    <configuration name="Test msqueue::tests::push_try_pop_many_mpmc" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
       <option name="channel" value="DEFAULT" />
-      <option name="command" value="test --package queues --lib msqueue::test::test_push_try_pop_many_mpmc -- --exact" />
+      <option name="command" value="test --package queues --lib msqueue::tests::push_try_pop_many_mpmc -- --exact" />
       <option name="allFeatures" value="false" />
       <option name="nocapture" value="false" />
       <option name="emulateTerminal" value="false" />
@@ -91,9 +94,9 @@
         <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
       </method>
     </configuration>
-    <configuration name="Test segqueue::test" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
+    <configuration name="Test segqueue::tests" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
       <option name="channel" value="DEFAULT" />
-      <option name="command" value="test --package queues --lib segqueue::test" />
+      <option name="command" value="test --package queues --lib segqueue::tests" />
       <option name="allFeatures" value="false" />
       <option name="nocapture" value="false" />
       <option name="emulateTerminal" value="false" />
@@ -104,9 +107,9 @@
         <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
       </method>
     </configuration>
-    <configuration name="Test segqueue::test::test_push_pop_many_spsc" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
+    <configuration name="Test segqueue::tests::push_try_pop_many_mpmc" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
       <option name="channel" value="DEFAULT" />
-      <option name="command" value="test --package queues --lib segqueue::test::test_push_pop_many_spsc -- --exact" />
+      <option name="command" value="test --package queues --lib segqueue::tests::push_try_pop_many_mpmc -- --exact" />
       <option name="allFeatures" value="false" />
       <option name="nocapture" value="false" />
       <option name="emulateTerminal" value="false" />
@@ -117,9 +120,9 @@
         <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
       </method>
     </configuration>
-    <configuration name="Test segqueue::test::test_push_try_pop_many_mpmc" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
+    <configuration name="Test segqueue::tests::push_try_pop_many_spmc" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
       <option name="channel" value="DEFAULT" />
-      <option name="command" value="test --package queues --lib segqueue::test::test_push_try_pop_many_mpmc -- --exact" />
+      <option name="command" value="test --package queues --lib segqueue::tests::push_try_pop_many_spmc -- --exact" />
       <option name="allFeatures" value="false" />
       <option name="nocapture" value="false" />
       <option name="emulateTerminal" value="false" />
@@ -132,11 +135,11 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Cargo Command.Test msqueue::test" />
-        <item itemvalue="Cargo Command.Test segqueue::test" />
-        <item itemvalue="Cargo Command.Test segqueue::test::test_push_pop_many_spsc" />
-        <item itemvalue="Cargo Command.Test segqueue::test::test_push_try_pop_many_mpmc" />
-        <item itemvalue="Cargo Command.Test msqueue::test::test_push_try_pop_many_mpmc" />
+        <item itemvalue="Cargo Command.Test segqueue::tests" />
+        <item itemvalue="Cargo Command.Test msqueue::tests" />
+        <item itemvalue="Cargo Command.Test msqueue::tests::push_try_pop_many_mpmc" />
+        <item itemvalue="Cargo Command.Test segqueue::tests::push_try_pop_many_mpmc" />
+        <item itemvalue="Cargo Command.Test segqueue::tests::push_try_pop_many_spmc" />
       </list>
     </recent_temporary>
   </component>
@@ -171,6 +174,7 @@
       <workItem from="1590065536240" duration="6506000" />
       <workItem from="1590385842792" duration="4340000" />
       <workItem from="1590728004680" duration="1021000" />
+      <workItem from="1590815819160" duration="4748000" />
     </task>
     <servers />
   </component>
@@ -189,5 +193,36 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/queue_test.rs</url>
+          <line>73</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/segqueue.rs</url>
+          <line>117</line>
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/segqueue.rs</url>
+          <line>121</line>
+          <option name="timeStamp" value="3" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/segqueue.rs</url>
+          <line>128</line>
+          <option name="timeStamp" value="4" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+    <watches-manager>
+      <configuration name="CargoCommandRunConfiguration">
+        <watch expression="cell" />
+      </configuration>
+    </watches-manager>
   </component>
 </project>
