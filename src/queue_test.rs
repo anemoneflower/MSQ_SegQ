@@ -106,8 +106,7 @@ pub fn test_push_pop_many_spsc<Q: Queue<i64> + std::marker::Sync>(qq: &Q) {
     .unwrap();
 }
 
-fn recv<Q: Queue<i64>>(_t: i32, q: &&Q) {
-    let q = q.deref();
+fn recv<Q: Queue<i64>>(_t: i32, q: &Q) {
     let mut cur = -1;
     for _i in 0..CONC_COUNT {
         if let Some(elem) = q.try_pop() {
@@ -120,12 +119,10 @@ fn recv<Q: Queue<i64>>(_t: i32, q: &&Q) {
         }
     }
 }
-pub fn test_push_try_pop_many_spmc<Q: Queue<i64> + std::marker::Sync>(qq: &Q) {
-    let q = qq.deref();
+pub fn test_push_try_pop_many_spmc<Q: Queue<i64> + std::marker::Sync>(q: &Q) {
     assert!(q.is_empty());
     scope(|scope| {
         for i in 0..3 {
-            let q = &q;
             scope.spawn(move |_| recv(i, q));
         }
 

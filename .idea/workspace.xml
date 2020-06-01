@@ -4,23 +4,13 @@
     <generated />
   </component>
   <component name="CMakeSettings">
-    <configurations>
-      <configuration PROFILE_NAME="Debug" CONFIG_NAME="Debug" />
-    </configurations>
+    <configurations />
   </component>
   <component name="CargoProjects">
     <cargoProject FILE="$PROJECT_DIR$/Cargo.toml" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="874c837e-7d93-4c0d-b397-491bdeb533f4" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/lockfree.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/lockfree.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/lib.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/msqueue.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/msqueue.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/queue_test.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/queue_test.rs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/segqueue.rs" beforeDir="false" afterPath="$PROJECT_DIR$/src/segqueue.rs" afterDir="false" />
-    </list>
-    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <list default="true" id="874c837e-7d93-4c0d-b397-491bdeb533f4" name="Default Changelist" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -29,31 +19,13 @@
   <component name="ClangdSettings">
     <option name="formatViaClangd" value="false" />
   </component>
-  <component name="FileTemplateManagerImpl">
-    <option name="RECENT_TEMPLATES">
-      <list>
-        <option value="Rust File" />
-      </list>
-    </option>
-  </component>
-  <component name="Git.Settings">
-    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
-  </component>
   <component name="MacroExpansionManager">
     <option name="directoryName" value="KzkveEBZ" />
   </component>
-  <component name="ProjectId" id="1YQH6yNkqHW1O5DwllqwVkpd8ta" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="PropertiesComponent">
-    <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
-    <property name="nodejs_package_manager_path" value="npm" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../MSQ" />
     <property name="org.rust.cargo.project.model.PROJECT_DISCOVERY" value="true" />
-  </component>
-  <component name="RunAnythingCache">
-    <option name="myCommands">
-      <command value="terminal" />
-    </option>
   </component>
   <component name="RunDashboard">
     <option name="ruleStates">
@@ -67,82 +39,6 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Cargo Command.Test segqueue::tests">
-    <configuration name="Test msqueue::tests" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
-      <option name="channel" value="DEFAULT" />
-      <option name="command" value="test --package queues --lib msqueue::tests" />
-      <option name="allFeatures" value="false" />
-      <option name="nocapture" value="false" />
-      <option name="emulateTerminal" value="false" />
-      <option name="backtrace" value="SHORT" />
-      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
-      <envs />
-      <method v="2">
-        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="Test msqueue::tests::push_try_pop_many_mpmc" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
-      <option name="channel" value="DEFAULT" />
-      <option name="command" value="test --package queues --lib msqueue::tests::push_try_pop_many_mpmc -- --exact" />
-      <option name="allFeatures" value="false" />
-      <option name="nocapture" value="false" />
-      <option name="emulateTerminal" value="false" />
-      <option name="backtrace" value="SHORT" />
-      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
-      <envs />
-      <method v="2">
-        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="Test segqueue::tests" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
-      <option name="channel" value="DEFAULT" />
-      <option name="command" value="test --package queues --lib segqueue::tests" />
-      <option name="allFeatures" value="false" />
-      <option name="nocapture" value="false" />
-      <option name="emulateTerminal" value="false" />
-      <option name="backtrace" value="SHORT" />
-      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
-      <envs />
-      <method v="2">
-        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="Test segqueue::tests::push_try_pop_many_mpmc" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
-      <option name="channel" value="DEFAULT" />
-      <option name="command" value="test --package queues --lib segqueue::tests::push_try_pop_many_mpmc -- --exact" />
-      <option name="allFeatures" value="false" />
-      <option name="nocapture" value="false" />
-      <option name="emulateTerminal" value="false" />
-      <option name="backtrace" value="SHORT" />
-      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
-      <envs />
-      <method v="2">
-        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="Test segqueue::tests::push_try_pop_many_spmc" type="CargoCommandRunConfiguration" factoryName="Cargo Command" temporary="true">
-      <option name="channel" value="DEFAULT" />
-      <option name="command" value="test --package queues --lib segqueue::tests::push_try_pop_many_spmc -- --exact" />
-      <option name="allFeatures" value="false" />
-      <option name="nocapture" value="false" />
-      <option name="emulateTerminal" value="false" />
-      <option name="backtrace" value="SHORT" />
-      <option name="workingDirectory" value="file://$PROJECT_DIR$" />
-      <envs />
-      <method v="2">
-        <option name="CARGO.BUILD_TASK_PROVIDER" enabled="true" />
-      </method>
-    </configuration>
-    <recent_temporary>
-      <list>
-        <item itemvalue="Cargo Command.Test segqueue::tests" />
-        <item itemvalue="Cargo Command.Test msqueue::tests" />
-        <item itemvalue="Cargo Command.Test msqueue::tests::push_try_pop_many_mpmc" />
-        <item itemvalue="Cargo Command.Test segqueue::tests::push_try_pop_many_mpmc" />
-        <item itemvalue="Cargo Command.Test segqueue::tests::push_try_pop_many_spmc" />
-      </list>
-    </recent_temporary>
-  </component>
   <component name="RustProjectSettings">
     <option name="toolchainHomeDirectory" value="$USER_HOME$/.cargo/bin" />
     <option name="version" value="2" />
@@ -151,78 +47,6 @@
     <configuration />
   </component>
   <component name="TaskManager">
-    <task active="true" id="Default" summary="Default task">
-      <changelist id="874c837e-7d93-4c0d-b397-491bdeb533f4" name="Default Changelist" comment="" />
-      <created>1582867726710</created>
-      <option name="number" value="Default" />
-      <option name="presentableId" value="Default" />
-      <updated>1582867726710</updated>
-      <workItem from="1582867728536" duration="3106000" />
-      <workItem from="1583762147923" duration="201000" />
-      <workItem from="1587126126385" duration="1302000" />
-      <workItem from="1587179253286" duration="1228000" />
-      <workItem from="1587231900839" duration="803000" />
-      <workItem from="1587296819492" duration="13559000" />
-      <workItem from="1587878713921" duration="8179000" />
-      <workItem from="1588175560516" duration="2293000" />
-      <workItem from="1588181713701" duration="96000" />
-      <workItem from="1588839495870" duration="887000" />
-      <workItem from="1589076483600" duration="9733000" />
-      <workItem from="1589206155008" duration="4682000" />
-      <workItem from="1589301320787" duration="55000" />
-      <workItem from="1589975191435" duration="10268000" />
-      <workItem from="1590065536240" duration="6506000" />
-      <workItem from="1590385842792" duration="4340000" />
-      <workItem from="1590728004680" duration="1021000" />
-      <workItem from="1590815819160" duration="4748000" />
-    </task>
     <servers />
-  </component>
-  <component name="TypeScriptGeneratedFilesManager">
-    <option name="version" value="1" />
-  </component>
-  <component name="Vcs.Log.Tabs.Properties">
-    <option name="TAB_STATES">
-      <map>
-        <entry key="MAIN">
-          <value>
-            <State>
-              <option name="COLUMN_ORDER" />
-            </State>
-          </value>
-        </entry>
-      </map>
-    </option>
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/src/queue_test.rs</url>
-          <line>73</line>
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/src/segqueue.rs</url>
-          <line>117</line>
-          <option name="timeStamp" value="2" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/src/segqueue.rs</url>
-          <line>121</line>
-          <option name="timeStamp" value="3" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/src/segqueue.rs</url>
-          <line>128</line>
-          <option name="timeStamp" value="4" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
-    <watches-manager>
-      <configuration name="CargoCommandRunConfiguration">
-        <watch expression="cell" />
-      </configuration>
-    </watches-manager>
   </component>
 </project>
