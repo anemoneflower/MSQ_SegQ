@@ -1,7 +1,8 @@
 /target
 /Cargo.lock
 
-/.idea
+.xml
+.iml
 
 # IntelliJ
 out/
