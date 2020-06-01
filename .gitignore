@@ -4,5 +4,7 @@
 .xml
 .iml
 
+.idea
+
 # IntelliJ
 out/
