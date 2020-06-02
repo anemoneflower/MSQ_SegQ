@@ -9,8 +9,8 @@ use crossbeam_utils::CachePadded;
 
 use crate::Queue;
 
-#[derive(Debug, Default)]
 /// Michael-Scott queue structure
+#[derive(Debug, Default)]
 pub struct MSQueue<T> {
     head: CachePadded<Atomic<Node<T>>>,
     tail: CachePadded<Atomic<Node<T>>>,
