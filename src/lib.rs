@@ -5,7 +5,6 @@
 #![warn(rust_2018_idioms)]
 
 #[macro_use]
-mod utils;
 mod msqueue;
 mod segqueue;
 
