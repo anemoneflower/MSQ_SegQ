@@ -59,21 +59,22 @@ impl<T> Queue<T> for MSQueue<T> {
             if unsafe { tail.deref() }
                 .next
                 .compare_and_set(Shared::null(), node, Ordering::Release, guard)
-                .is_ok()
+                .is_err()
             {
-                let _ = self
-                    .tail
-                    .compare_and_set(tail, node, Ordering::Release, guard);
-                break;
+                // if tail is not real tail, move tail pointer forward
+                let _ = self.tail.compare_and_set(
+                    tail,
+                    unsafe { tail.deref() }.next.load(Ordering::Relaxed, guard),
+                    Ordering::Release,
+                    guard,
+                );
+                continue;
             }
 
-            // if tail is not real tail, move tail pointer forward
-            let _ = self.tail.compare_and_set(
-                tail,
-                unsafe { tail.deref() }.next.load(Ordering::Relaxed, guard),
-                Ordering::Release,
-                guard,
-            );
+            let _ = self
+                .tail
+                .compare_and_set(tail, node, Ordering::Release, guard);
+            break;
         }
     }
 
