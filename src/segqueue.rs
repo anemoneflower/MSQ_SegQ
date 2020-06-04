@@ -13,8 +13,8 @@ use crate::Queue;
 
 const SEG_SIZE: usize = 32;
 
-#[derive(Debug, Default)]
 /// Segment Queue structure
+#[derive(Debug, Default)]
 pub struct SegQueue<T> {
     head: Atomic<Segment<T>>,
     tail: Atomic<Segment<T>>,
@@ -63,9 +63,8 @@ impl<T> Queue<T> for SegQueue<T> {
 
     fn push(&self, t: T) {
         let guard = &pin();
-
+        // loop for load real tail
         loop {
-            //load acquire tail
             let tail = unsafe { self.tail.load(Ordering::Acquire, guard).deref_mut() };
             //check if this is real tail
             if tail.high.load(Ordering::Relaxed) >= SEG_SIZE {
@@ -77,11 +76,9 @@ impl<T> Queue<T> for SegQueue<T> {
                 continue;
             }
 
-            let cell;
-            unsafe {
-                cell = (*tail).data.get_unchecked_mut(cur_high);
-                cell.0.as_mut_ptr().write(t);
-            }
+            let cell = unsafe { (*tail).data.get_unchecked_mut(cur_high) };
+            unsafe { cell.0.as_mut_ptr().write(t) };
+
             (*cell).1.store(true, Ordering::Release);
             if cur_high + 1 == SEG_SIZE {
                 let new_tail = Owned::new(Segment::new()).into_shared(guard);
@@ -94,11 +91,11 @@ impl<T> Queue<T> for SegQueue<T> {
 
     fn try_pop(&self) -> Option<T> {
         let guard = &pin();
-
+        // loop for load head segment
         loop {
             let head = self.head.load(Ordering::Acquire, guard);
             let head_ref = unsafe { head.as_ref() }.unwrap();
-
+            // loop for load data in sement
             loop {
                 let low = head_ref.low.load(Ordering::Relaxed);
                 // If head is empty, load head again.
@@ -117,8 +114,8 @@ impl<T> Queue<T> for SegQueue<T> {
                     if low + 1 != SEG_SIZE {
                         return unsafe { Some(ptr::read((*cell).0.as_ptr())) };
                     }
+                    // loop for load next segment and update head to loaded segment
                     loop {
-                        // load next segment
                         let next_head = head_ref.next.load(Ordering::Acquire, guard);
                         if unsafe { next_head.as_ref() }.is_some()
                             && self
